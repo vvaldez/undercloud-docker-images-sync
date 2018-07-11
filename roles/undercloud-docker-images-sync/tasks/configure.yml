@@ -1,0 +1,37 @@
+---
+- name: check for entries in /etc/sysconfig/docker
+  slurp:
+    src: /etc/sysconfig/docker
+  register: docker_config
+
+# This is not the most accurate check, but seemed to work in my tests. Needs to be more explicit check
+- name: check if registries already added to /etc/sysconfig/docker
+  set_fact:
+    docker_entry_in_config: True
+  when: 
+    - (docker_config.content | b64decode ) | search(undercloud_docker_images_sync_local_hostname)
+    - (docker_config.content | b64decode ) | search(undercloud_docker_images_sync_upstream_hostname)
+
+- name: add docker URLs to config if needed
+  lineinfile:
+    dest: '/etc/sysconfig/docker'
+    line: 'INSECURE_REGISTRY="--insecure-registry {{ undercloud_docker_images_sync_local_hostname }}:{{ docker_registry_setup_port }} --insecure-registry {{ docker_registry_setup_upstream_hostname }}"'
+    regexp: '^INSECURE_REGISTRY=.*$'
+    state: present
+  notify: "restart docker"
+  become: yes
+  when: docker_entry_in_config | default(False) | bool == True
+
+# Restart docker right away
+- meta: flush_handlers
+
+# This may not need to create the deployment file which is --output-env-file since we have a predictable template with essentially the same info
+- name: create docker image files for upload and later deployment
+  shell: . /home/stack/stackrc ; openstack overcloud container image prepare \
+      --namespace={{ undercloud_docker_images_sync_upstream_hostname }}/{{ docker_registry_setup_image_rhosp_version }} \
+      --push-destination={{ undercloud_docker_images_sync_local_hostname }}:{{ docker_registry_setup_port }} \
+      --prefix={{ undercloud_docker_images_sync_image_prefix }} \
+      --tag-from-label {version}-{release} \
+      --output-env-file={{ undercloud_docker_images_sync_overcloud_images_file }} \
+      --output-images-file={{ undercloud_docker_images_sync_upstream_images_file }}
+...

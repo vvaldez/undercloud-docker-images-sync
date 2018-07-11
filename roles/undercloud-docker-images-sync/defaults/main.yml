@@ -1,0 +1,14 @@
+---
+undercloud_docker_images_sync_upstream_hostname: registry.access.redhat.com
+# This should be the same as undercloud, for now just setting static example IP but can be in inventory
+undercloud_docker_images_sync_local_hostname: 172.16.0.1
+#undercloud_docker_images_sync_local_hostname: "{{ ansible_all_ipv4_addresses | ipaddr(provisioning_cidr) | first() }}"
+undercloud_docker_images_sync_port: 8787
+undercloud_docker_images_sync_url_suffix: "/v2/_catalog"
+undercloud_docker_images_sync_image_prefix: "openstack-"
+undercloud_docker_images_sync_image_rhosp_version: rhosp13
+undercloud_docker_images_sync_upstream_images_file: "upstream-container-images.yaml"
+undercloud_docker_images_sync_overcloud_images_file: "overcloud-images.yaml"
+undercloud_docker_images_sync_sync: True
+undercloud_docker_images_sync_force: False
+...

@@ -1,0 +1,7 @@
+---
+- name: restart docker
+  listen: "restart docker"
+  systemd:
+    state: restarted
+    name: docker 
+...

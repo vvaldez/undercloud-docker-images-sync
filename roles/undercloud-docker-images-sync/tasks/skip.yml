@@ -1,0 +1,6 @@
+---
+# Adding in case a force is desired
+- name: skipping docker registry configuration, images already exist. override with the variable 'undercloud_docker_images_sync_force{{':'}} True'
+  pause:
+    seconds: "{{ pause_delay | default(10) }}"
+...

@@ -1,0 +1,6 @@
+---
+- hosts: undercloud
+  tasks:
+    - import_role:
+        name: undercloud-docker-images-sync
+...
